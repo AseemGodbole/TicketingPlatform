@@ -1,0 +1,517 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background: #ffffff;
+    /* white background */
+    color: #000;
+    padding-top: 55px;
+    /* Space for fixed header */
+}
+
+h1 {
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+/* Event header styling */
+.event-header {
+    text-align: center;
+    margin: 5px 0 5px 0;
+    padding: 0 15px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: #ffffff;
+    z-index: 100;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.event-header .powered-by {
+    position: absolute;
+    top: 15px;
+    right: 25px;
+    font-size: 6px;
+    color: #999;
+    font-weight: 500;
+    margin: 0;
+    padding: 0;
+    text-align: right;
+    line-height: 1;
+}
+
+.event-header h1 {
+    margin: 5px auto 3px auto;
+    font-size: 22px;
+    font-weight: bold;
+    color: #333;
+}
+.event-row-flex {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 18px;
+}
+
+.contact-no {
+    font-size: 15px;
+    color: #007b55;
+    font-weight: 600;
+}
+.contact-no a {
+    color: #007b55;
+    text-decoration: none;
+    font-weight: 700;
+}
+.contact-no a:hover {
+    text-decoration: underline;
+}
+.event-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 4px;
+}
+.event-row .event-details {
+    font-size: 13px;
+    color: #666;
+    font-weight: 500;
+    margin: 0;
+}
+.event-row .contact-no {
+    font-size: 13px;
+    color: #666;
+    font-weight: 500;
+    margin: 0;
+}
+.event-row .contact-no a {
+    color: #666;
+    text-decoration: none;
+    font-weight: 500;
+}
+.event-row .contact-no a:hover {
+    text-decoration: underline;
+}
+.event-details {
+    margin: 1px auto 4px auto;
+    font-size: 13px;
+    color: #666;
+    font-weight: 500;
+}
+
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin-top: 120px;
+    padding-top: 10px;
+    transform: scale(0.85);
+    /* zoom out a bit so whole chart fits */
+    transform-origin: top center;
+}
+
+/* Stage bar at the top */
+.stage {
+    width: 80%;
+    max-width: 820px;
+    height: 22px;
+    border-radius: 12px;
+    background: linear-gradient(to bottom, #ddd, #999);
+    color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+}
+
+/* Block of rows (top or bottom) */
+.seats-block {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: center;
+}
+
+/* Single row */
+.row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Extra side gap for P row so labels are not too close to seats */
+.row.row-p {
+    gap: 40px;
+}
+
+/* Row labels A, B, C... */
+.row-label {
+    width: 14px;
+    font-size: 10px;
+}
+
+/* area that holds the seats + vertical aisles */
+.seat-row {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+    /* center whole row around middle */
+}
+
+/* vertical aisle gap */
+.aisle-vert {
+    width: 20px;
+    /* vertical aisle width; change if you want wider/narrower */
+}
+
+/* AVAILABLE seat (green outline, transparent) */
+.seat {
+    padding: 4px 6px;
+    border-radius: 3px;
+    cursor: pointer;
+    background: transparent;
+    border: 2px solid #28a745;
+    color: #28a745;
+    font-size: 9px;
+    min-width: 22px;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+/* placeholder "empty" seat: invisible but keeps width for alignment */
+.seat.empty {
+    visibility: hidden;
+    border: none;
+    cursor: default;
+    pointer-events: none;
+}
+
+/* Explicit removed seat slot (visible placeholder, not selectable) */
+.seat.empty.no-seat {
+    visibility: visible;
+    border: 1px dashed #bbb;
+    background: #f5f5f5;
+    color: #999;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* LOCKED seat (black filled - payment in progress) */
+.seat.locked:not(.booked) {
+    background: #000 !important;
+    border-color: #000 !important;
+    color: #fff !important;
+    pointer-events: none;
+    cursor: default !important;
+}
+
+/* BOOKED seat (red filled) - HIGHEST PRIORITY, always wins */
+.seat.booked,
+.seat.booked.locked,
+.seat.locked.booked {
+    background: #d9534f !important;
+    border-color: #d9534f !important;
+    color: #fff !important;
+    pointer-events: none;
+}
+
+/* SELECTED seat (green filled) */
+.seat.selected {
+    background: #28a745;
+    border-color: #28a745;
+    color: #fff;
+}
+
+/* Horizontal main aisle between top and bottom blocks */
+.horizontal-aisle {
+    width: 85%;
+    max-width: 820px;
+    height: 22px;
+    margin: 6px 0 4px 0;
+    background: #cccccc;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 18px;
+    border-radius: 4px;
+}
+
+.entry-label {
+    font-size: 9px;
+    font-weight: bold;
+    color: #ff9800;
+}
+
+.aisle-label {
+    font-size: 9px;
+    font-weight: bold;
+    color: #000;
+}
+
+/* Legend */
+.legend {
+    display: flex;
+    gap: 16px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    font-size: 11px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.legend-box {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+}
+
+/* legend colors reuse the same scheme */
+.legend-available {
+    border: 2px solid #28a745;
+    background: transparent;
+}
+
+.legend-selected {
+    background: #28a745;
+}
+
+.legend-locked {
+    background: #000;
+}
+
+.legend-booked {
+    background: #d9534f;
+}
+
+/* Button Styles */
+.btn {
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    background-color: #333;
+    color: #fff;
+    transition: all 0.2s;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.btn:hover {
+    background-color: #555;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.btn:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* ============================================ */
+/* MOBILE RESPONSIVE DESIGN */
+/* ============================================ */
+
+/* Tablets and smaller */
+@media (max-width: 768px) {
+    body {
+        font-size: 14px;
+        padding-top: 60px;
+    }
+
+    .event-header h1 {
+        font-size: 24px;
+    }
+
+    .event-details {
+        font-size: 14px;
+    }
+
+    .wrapper {
+        transform: scale(0.65);
+        /* Scale down more for tablets */
+        gap: 8px;
+        margin-top: 70px;
+    }
+
+    .stage {
+        font-size: 10px;
+        height: 20px;
+    }
+
+    /* Slightly larger touch targets for tablets */
+    .seat {
+        min-width: 24px;
+        padding: 5px 7px;
+        font-size: 10px;
+    }
+
+    .legend {
+        gap: 12px;
+        font-size: 12px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .legend-box {
+        width: 16px;
+        height: 16px;
+    }
+}
+
+/* Mobile phones */
+@media (max-width: 480px) {
+    body {
+        font-size: 14px;
+        padding-top: 110px;
+        margin: 0;
+        overflow-x: auto;
+    }
+
+    .event-header {
+        padding: 0 10px;
+    }
+
+    .event-header h1 {
+        font-size: 22px;
+        margin: 8px auto 4px auto;
+    }
+
+    .event-details {
+        font-size: 13px;
+        margin: 2px auto 6px auto;
+    }
+
+    .wrapper {
+        transform: scale(0.75);
+        /* Larger scale - allows horizontal scrolling */
+        gap: 8px;
+        margin-top: 120px;
+        padding: 0 10px;
+        overflow-x: auto;
+        min-width: max-content;
+    }
+
+    .stage {
+        font-size: 11px;
+        height: 22px;
+        letter-spacing: 1.5px;
+    }
+
+    /* Larger touch targets for mobile */
+    .seat {
+        min-width: 32px;
+        padding: 7px 9px;
+        font-size: 12px;
+        border-width: 2.5px;
+        /* Thicker borders for better visibility */
+    }
+
+    /* Larger row labels */
+    .row-label {
+        width: 18px;
+        font-size: 12px;
+        font-weight: bold;
+    }
+
+    /* Legend adjustments */
+    .legend {
+        gap: 12px;
+        font-size: 13px;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+
+    .legend-item {
+        gap: 6px;
+    }
+
+    .legend-box {
+        width: 20px;
+        height: 20px;
+    }
+
+    /* Selected seats and total */
+    p {
+        font-size: 15px;
+        margin: 10px 0;
+    }
+
+    #selected,
+    #total {
+        font-weight: bold;
+        font-size: 16px;
+    }
+
+    /* Confirm button - larger for mobile */
+    #confirm-btn {
+        width: 90%;
+        max-width: 350px;
+        padding: 15px 24px;
+        font-size: 17px;
+        margin: 12px auto;
+        display: block;
+    }
+
+    /* Horizontal aisle labels */
+    .horizontal-aisle {
+        height: 22px;
+        font-size: 10px;
+    }
+
+    .entry-label {
+        font-size: 9px;
+    }
+
+    .aisle-label {
+        font-size: 9px;
+    }
+}
+
+/* Extra small phones */
+@media (max-width: 360px) {
+    body {
+        padding-top: 90px;
+    }
+
+    .event-header h1 {
+        font-size: 20px;
+    }
+
+    .event-details {
+        font-size: 12px;
+    }
+
+    .wrapper {
+        transform: scale(0.7);
+        /* Slightly smaller but still allows scrolling */
+    }
+
+    .legend {
+        font-size: 12px;
+        gap: 10px;
+    }
+
+    .legend-box {
+        width: 18px;
+        height: 18px;
+    }
+}

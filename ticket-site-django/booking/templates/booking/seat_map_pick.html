@@ -1,0 +1,766 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Seat Booking</title>
+    <link rel="stylesheet" href="{% static 'booking/style.css' %}">
+    <style>
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+            position: relative;
+            z-index: 2001;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 450px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-content h3 {
+            margin: 0 0 20px 0;
+            font-size: 20px;
+            color: #333;
+        }
+
+        .checkout-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .form-row label {
+            font-weight: 600;
+            font-size: 14px;
+            color: #333;
+            min-width: 80px;
+        }
+
+        .form-row input {
+            flex: 1;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: #fff;
+            box-sizing: border-box;
+        }
+
+        .form-row input:focus {
+            outline: none;
+            border-color: #333;
+            box-shadow: 0 0 0 2px rgba(51, 51, 51, 0.1);
+        }
+
+        .payment-section {
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+            margin-top: 15px;
+        }
+
+        .payment-section h4 {
+            margin: 0 0 12px 0;
+            font-size: 14px;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        .qr-section {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .qr-code {
+            max-width: 150px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            padding: 10px;
+            background: #f9f9f9;
+        }
+
+        .upi-copy-section {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .upi-id {
+            flex: 1;
+            padding: 10px;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 13px;
+            word-break: break-all;
+            color: #333;
+        }
+
+        .btn-copy {
+            padding: 10px 15px;
+            background-color: #333;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .btn-copy:hover {
+            background-color: #555;
+        }
+
+        .btn-copy:active {
+            background-color: #222;
+        }
+
+        .utr-input-section {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .utr-input-section label {
+            font-weight: 600;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .utr-input-section input {
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .modal-buttons {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background-color: #333;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background-color: #555;
+        }
+
+        .btn-secondary {
+            background-color: #f0f0f0;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+
+        .btn-secondary:hover {
+            background-color: #e0e0e0;
+        }
+
+        .error-message {
+            color: #d32f2f;
+            font-size: 13px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .success-message {
+            color: #388e3c;
+            font-size: 13px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        /* ============================================ */
+        /* MOBILE RESPONSIVE - MODALS */
+        /* ============================================ */
+
+        @media (max-width: 480px) {
+            .modal-content {
+                padding: 20px;
+                width: 95%;
+                max-width: 100%;
+                border-radius: 6px;
+            }
+
+            .modal-content h3 {
+                font-size: 18px;
+                margin-bottom: 15px;
+            }
+
+            /* Stack form labels above inputs on mobile */
+            .form-row {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 5px;
+            }
+
+            .form-row label {
+                min-width: auto;
+                font-size: 13px;
+            }
+
+            .form-row input {
+                padding: 12px;
+                font-size: 16px;
+                /* Prevents zoom on iOS */
+            }
+
+            /* QR Code larger on mobile */
+            .qr-code {
+                max-width: 180px;
+            }
+
+            /* UPI Copy section */
+            .upi-copy-section {
+                flex-direction: column;
+            }
+
+            .btn-copy {
+                padding: 12px;
+                font-size: 14px;
+            }
+
+            /* UTR Input */
+            .utr-input-section input {
+                padding: 12px;
+                font-size: 16px;
+            }
+
+            /* Modal buttons */
+            .modal-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .btn {
+                padding: 14px;
+                font-size: 15px;
+            }
+
+            .payment-section h4 {
+                font-size: 13px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .modal-content {
+                padding: 15px;
+            }
+
+            .modal-content h3 {
+                font-size: 16px;
+            }
+
+            .qr-code {
+                max-width: 150px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="event-header">
+        <div style="text-align: right; font-size: 9px; color: #999; margin-bottom: 5px;">Developed by Aseem</div>
+        <h1>Geet Ramayan</h1>
+        <p class="event-details">26 March 2026, Thursday</p>
+        <div class="event-row-flex">
+            <span class="event-details">6:15 PM to 8:15 PM</span>
+            <span class="contact-no">| Contact: <a href="tel:9850889706">9850889706</a></span>
+        </div>
+    </div>
+
+    <div class="wrapper">
+        <!-- Stage -->
+        <div class="stage">STAGE</div>
+
+        <!-- TOP BLOCK: rows A–F -->
+        <div id="seats-top" class="seats-block"></div>
+
+        <!-- MAIN HORIZONTAL AISLE -->
+        <div class="horizontal-aisle">
+            <span class="entry-label">Entry</span>
+            <span class="aisle-label">AISLE</span>
+            <span style="visibility: hidden;">Entry</span>
+        </div>
+
+        <!-- BOTTOM BLOCK: rows G–P -->
+        <div id="seats-bottom" class="seats-block"></div>
+
+        <!-- Legend -->
+        <div class="legend">
+            <div class="legend-item">
+                <span class="legend-box legend-available"></span>
+                <span>Available</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-box legend-selected"></span>
+                <span>Selected</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-box legend-locked"></span>
+                <span>Locked</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-box legend-booked"></span>
+                <span>Booked</span>
+            </div>
+        </div>
+
+        <!-- Selection summary -->
+        <p>Selected seats: <span id="selected"></span></p>
+        <p>Total: ₹<span id="total">0</span></p>
+
+        <!-- Confirm button - shows modal -->
+        <button id="confirm-btn" class="btn">Confirm & Pay</button>
+    </div>
+
+    <!-- Checkout Modal (Details) -->
+    <!-- Checkout Modal (Details) -->
+    <div id="checkout-modal" class="modal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <h3>Enter Your Details</h3>
+            <form id="checkout-form" class="checkout-form">
+                <div class="form-row">
+                    <label>Name *</label>
+                    <input type="text" name="name" required />
+                    <div class="error-message"></div>
+                </div>
+
+                <div class="form-row">
+                    <label>Email *</label>
+                    <input type="email" name="email" required />
+                    <div class="error-message"></div>
+                </div>
+
+                <p style="color: #d32f2f; font-size: 12px; margin: 5px 0 15px 0;">
+                    Please confirm your email address to ensure your tickets are delivered correctly.
+                </p>
+
+                <div class="form-row">
+                    <label>Phone *</label>
+                    <input type="tel" name="phone" required />
+                    <div class="error-message"></div>
+                </div>
+
+                <!-- Buttons -->
+                <div class="modal-buttons">
+                    <button type="button" class="btn btn-primary" id="proceed-to-payment">Pay Now</button>
+                    <button type="button" class="btn btn-secondary" id="cancel-modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Payment Modal (QR + UTR) -->
+    <!-- Payment Modal (QR + UTR) -->
+    <div id="payment-modal" class="modal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <h3>Complete Payment</h3>
+            <p style="color: #d32f2f; font-size: 13px; font-weight: 600; margin: 10px 0 20px 0; text-align: center;">
+                ⏱️ Please complete the payment within the next 5 minutes to confirm your booking.
+            </p>
+            <form id="payment-form" class="checkout-form">
+                <!-- Payment Section -->
+                <div class="payment-section">
+                    <h4>Payment Instructions</h4>
+
+                    <!-- QR Code -->
+                    <div class="qr-section">
+                        <p style="font-size: 12px; color: #666; margin: 0 0 10px 0;">Scan to pay:</p>
+                        <img src="{% static 'booking/qr.jpeg' %}" alt="Payment QR Code" class="qr-code" />
+                    </div>
+
+                    <!-- UPI Copy Section -->
+                    <p style="font-size: 12px; color: #666; margin: 10px 0 8px 0;">Or copy UPI ID:</p>
+                    <div class="upi-copy-section">
+                        <div class="upi-id" id="upi-id-display">9850889706@ibl</div>
+                        <button type="button" class="btn-copy" id="copy-upi-btn">Copy</button>
+                    </div>
+
+                    <!-- UTR Input -->
+                    <div class="utr-input-section">
+                        <label>Enter Transaction ID (UTR) *</label>
+                        <input type="text" name="utr" placeholder="Enter UTR from your payment app" required />
+                        <div class="error-message"></div>
+                    </div>
+                </div>
+
+                <!-- Buttons -->
+                <div class="modal-buttons">
+                    <button type="submit" class="btn btn-primary" id="submit-booking">Submit Booking</button>
+                    <button type="button" class="btn btn-secondary" id="back-to-details">Back</button>
+                </div>
+
+                <div class="success-message"></div>
+            </form>
+        </div>
+    </div>
+    <!-- Success Confirmation Modal -->
+    <div id="success-modal" class="modal" >
+        <div class="modal-backdrop"></div>
+        <div class="modal-content" style="text-align: center; max-width: 400px;">
+            <h2 style="color: #4caf50; margin-bottom: 20px;">✓ Booking Submitted!</h2>
+            <p style="font-size: 16px; color: #333; line-height: 1.6;">
+                Admin will verify your payment within 24 hours.
+            </p>
+            <p style="font-size: 14px; color: #666; margin-top: 15px;">
+                You will receive a confirmation email once your booking is verified.
+            </p>
+            <button type="button" class="btn btn-primary" id="close-success-modal" style="margin-top: 20px; width: 100%;">
+                OK
+            </button>
+        </div>
+    </div>
+
+    <!-- Booked seats from Django as JSON -->
+    <script id="booked-seats-data" type="application/json">{{ booked_seats_json|safe }}</script>
+    <script id="locked-seats-data" type="application/json">{{ locked_seats_json|safe }}</script>
+
+    <!-- CSRF Token -->
+    <script>
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        const csrftoken = getCookie('csrftoken');
+    </script>
+
+    <!-- Main Script -->
+    <script src="{% static 'booking/script.js' %}"></script>
+
+    <!-- Custom Payment Handling -->
+    <script>
+        const checkoutModal = document.getElementById('checkout-modal');
+        const paymentModal = document.getElementById('payment-modal');
+
+        // Track seats that user has locked for this session
+        let userLockedSeats = [];
+
+        // Copy UPI ID to clipboard
+        document.getElementById('copy-upi-btn').addEventListener('click', function (e) {
+            e.preventDefault();
+            const upiId = document.getElementById('upi-id-display').textContent;
+            navigator.clipboard.writeText(upiId).then(() => {
+                const btn = this;
+                const originalText = btn.textContent;
+                btn.textContent = 'Copied!';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                }, 2000);
+            });
+        });
+
+        // Handle modal open/close
+        document.getElementById('confirm-btn').addEventListener('click', function () {
+            if (window.selectedSeats && window.selectedSeats.size > 0) {
+                checkoutModal.classList.add('show');
+            } else {
+                alert('Please select at least one seat');
+            }
+        });
+
+        // Close checkout modal
+        document.getElementById('cancel-modal').addEventListener('click', function () {
+            checkoutModal.classList.remove('show');
+        });
+
+        // Proceed from details to payment
+        document.getElementById('proceed-to-payment').addEventListener('click', async function () {
+            console.log("Proceed to Payment clicked");
+            const name = document.querySelector('#checkout-form input[name="name"]').value.trim();
+            const email = document.querySelector('#checkout-form input[name="email"]').value.trim();
+            const phone = document.querySelector('#checkout-form input[name="phone"]').value.trim();
+
+            if (!name || !email || !phone) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            // Lock seats immediately (turn black)
+            const seatIds = Array.from(window.selectedSeats || []);
+            console.log("Selected seats:", seatIds);
+
+            if (seatIds.length === 0) {
+                alert('Please select at least one seat');
+                return;
+            }
+
+            try {
+                console.log("Calling /lock-seats/ with:", seatIds);
+                // Call backend to lock seats
+                const response = await fetch('/lock-seats/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrftoken
+                    },
+                    body: JSON.stringify({ seats: seatIds })
+                });
+
+                const data = await response.json();
+                console.log("Lock response:", data);
+
+                if (data.success) {
+                    console.log("Success! Turning seats black");
+                    // Turn selected seats black (locked)
+                    seatIds.forEach(seatId => {
+                        const seatElement = document.querySelector(`[data-seat="${seatId}"]`);
+                        if (seatElement) {
+                            console.log("Adding locked class to", seatId);
+                            seatElement.classList.remove('selected');
+                            seatElement.classList.add('locked');
+                        }
+                    });
+
+                    // Store locked seats for submission
+                    userLockedSeats = seatIds;
+                    window.selectedSeats.clear(); // Clear selection since they're now locked
+
+                    // Close checkout modal and open payment modal
+                    checkoutModal.classList.remove('show');
+                    paymentModal.classList.add('show');
+                } else {
+                    console.error("Lock failed:", data.error);
+                    alert('Failed to lock seats: ' + (data.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error locking seats:', error);
+                alert('Error locking seats. Please try again.');
+            }
+        });
+
+        // Back from payment to details
+        document.getElementById('back-to-details').addEventListener('click', function () {
+            paymentModal.classList.remove('show');
+            checkoutModal.classList.add('show');
+        });
+
+        // Close payment modal backdrop
+        document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+            backdrop.addEventListener('click', function () {
+                checkoutModal.classList.remove('show');
+                paymentModal.classList.remove('show');
+            });
+        });
+
+        // Handle payment form submission with UTR
+        document.getElementById('payment-form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            // Disable submit button to prevent double-click
+            const submitBtn = document.getElementById('submit-booking');
+            if (submitBtn.disabled) {
+                console.log('Form already submitted, ignoring double-click');
+                return;
+            }
+            submitBtn.disabled = true;
+            const originalText = submitBtn.innerText;
+            submitBtn.innerText = 'Processing...';
+
+            const name = document.querySelector('#checkout-form input[name="name"]').value.trim();
+            const email = document.querySelector('#checkout-form input[name="email"]').value.trim();
+            const phone = document.querySelector('#checkout-form input[name="phone"]').value.trim();
+            const utr = document.querySelector('#payment-form input[name="utr"]').value.trim();
+
+            if (!utr) {
+                alert('Please enter Transaction ID (UTR)');
+                submitBtn.disabled = false;
+                submitBtn.innerText = originalText;
+                return;
+            }
+
+            // Use locked seats (from previous step)
+            const seatIds = userLockedSeats;
+            if (seatIds.length === 0) {
+                alert('No seats locked for booking');
+                submitBtn.disabled = false;
+                submitBtn.innerText = originalText;
+                return;
+            }
+
+            // Send booking request
+            try {
+                console.log('Sending booking request:', {
+                    name, email, phone, seats: seatIds, utr
+                });
+
+                const response = await fetch('/submit-seats/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrftoken
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        email: email,
+                        phone: phone,
+                        seats: seatIds,
+                        utr: utr
+                    })
+                });
+
+                console.log('Response status:', response.status);
+                const text = await response.text();
+                console.log('Response text:', text);
+
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (e) {
+                    console.error('Failed to parse JSON:', e);
+                    alert('Server error: ' + text);
+                    return;
+                }
+
+                console.log('Response data:', data);
+
+                if (data.success) {
+                    console.log('Booking successful! Turning seats red. seatIds:', seatIds);
+
+                    // First manually update classes with force
+                    seatIds.forEach(seatId => {
+                        console.log('Processing seat:', seatId);
+                        const seatElement = document.querySelector(`[data-seat="${seatId}"]`);
+                        console.log('Found seat element:', seatElement);
+                        if (seatElement) {
+                            console.log('Current classes before:', seatElement.className);
+                            // Remove locked class FIRST
+                            seatElement.classList.remove('locked');
+                            seatElement.classList.remove('selected');
+                            // Then add booked
+                            seatElement.classList.add('booked');
+                            // Force style update with !important
+                            seatElement.style.setProperty('background', '#d9534f', 'important');
+                            seatElement.style.setProperty('border-color', '#d9534f', 'important');
+                            seatElement.style.setProperty('color', '#fff', 'important');
+                            console.log('Current classes after:', seatElement.className);
+                            console.log('Inline styles after:', seatElement.style.background, seatElement.style.borderColor);
+                            console.log('Computed style:', window.getComputedStyle(seatElement).backgroundColor);
+                        } else {
+                            console.error('Seat element not found for:', seatId);
+                        }
+                    });
+
+                    // Then use the markSeatsAsBooked function from script.js
+                    markSeatsAsBooked(seatIds);
+
+                    paymentModal.classList.remove('show');
+
+                    // Show success modal
+                    const successModal = document.getElementById("success-modal");
+                    if (successModal) {
+                        successModal.classList.add("show");
+
+                        const closeBtn = document.getElementById("close-success-modal");
+                        if (closeBtn) {
+                            closeBtn.onclick = () => {
+                                successModal.classList.remove("show");
+                                window.location.href = "/";
+                            };
+                        }
+
+                        setTimeout(() => {
+                            window.location.href = "/";
+                        }, 5000);
+                    }
+                } else {
+                    const errorMsg = data.error || data.message || 'Failed to submit booking';
+                    console.error('Error from server:', errorMsg);
+                    alert('Error: ' + errorMsg);
+                    // Re-enable button on error
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = originalText;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error submitting booking: ' + error.message);
+                // Re-enable button on error
+                submitBtn.disabled = false;
+                submitBtn.innerText = originalText;
+            }
+        });
+    </script>
+
+    <!-- Auto-scroll to center the seating chart on page load -->
+    <script>
+        window.addEventListener('load', function () {
+            // Wait a bit for the page to fully render
+            setTimeout(function () {
+                // Calculate the center position
+                const body = document.body;
+                const html = document.documentElement;
+                const scrollWidth = Math.max(body.scrollWidth, html.scrollWidth);
+                const clientWidth = Math.max(body.clientWidth, html.clientWidth);
+
+                // Center horizontally by scrolling to middle, with offset to the right
+                const scrollAmount = (scrollWidth - clientWidth) / 2 + 85;  // Added 85px offset to right
+                if (scrollAmount > 0) {
+                    window.scrollTo({
+                        left: scrollAmount > 0 ? scrollAmount : 0,  // Scroll up 20px to show more stage
+                        behavior: 'auto'
+                    });
+                }
+            }, 100);
+        });
+    </script>
+</body>
+
+</html>
